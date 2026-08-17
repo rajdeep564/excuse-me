@@ -12,4 +12,26 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  vite: {
+    environments: {
+      ssr: {
+        build: {
+          rolldownOptions: {
+            output: {
+              codeSplitting: false,
+            },
+          },
+        },
+      },
+      nitro: {
+        build: {
+          rolldownOptions: {
+            output: {
+              codeSplitting: false,
+            },
+          },
+        },
+      },
+    },
+  },
 });
