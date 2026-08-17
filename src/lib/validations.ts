@@ -1,0 +1,75 @@
+import { z } from "zod";
+
+export const excuseRequestSchema = z.object({
+  situation: z.enum([
+    "late_to_work",
+    "didnt_reply",
+    "unfinished_task",
+    "missed_gym",
+    "didnt_study",
+    "ghosted",
+    "left_on_read",
+    "skipped_class",
+    "late_to_college",
+    "forgot_bday",
+    "mood_off",
+    "overslept",
+  ]),
+  audience: z.enum([
+    "boss",
+    "teacher",
+    "friend",
+    "partner",
+    "parents",
+    "gym_buddy",
+    "client",
+    "myself",
+    "crush",
+    "roommate",
+    "sibling",
+    "hr",
+  ]),
+  mode: z.enum(["believable", "corporate", "insane"]),
+  personality: z.enum([
+    "professional",
+    "passive_aggressive",
+    "overconfident",
+    "victim_mode",
+    "technically_true",
+    "gen_z",
+    "corporate_npc",
+    "main_character",
+    "unhinged",
+    "desi_genz",
+    "delhi_swag",
+    "soft_boy",
+    "chaotic_neutral",
+    "cringe_core",
+  ]),
+  intensity: z.number().int().min(0).max(100),
+  language: z.enum(["english", "hinglish", "hindi"]),
+  format: z.enum([
+    "chat_reply",
+    "voice_note",
+    "formal_message",
+    "story_caption",
+    "meme_pov",
+    "meme_nobody",
+    "cringe_confession",
+  ]),
+  context: z.string().max(400).optional(),
+});
+
+const score = z.number().min(0).max(100);
+
+export const excuseResultSchema = z.object({
+  excuse: z.string().min(1).max(1200),
+  shortVersion: z.string().min(1).max(400),
+  scores: z.object({
+    believability: score,
+    suspicion: score,
+    corporateBS: score,
+  }),
+  verdict: z.string().min(1).max(300),
+  category: z.string().min(1).max(60),
+});
