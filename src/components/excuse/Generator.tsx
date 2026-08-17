@@ -1,16 +1,11 @@
 import { useCallback, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { useServerFn } from "@tanstack/react-start";
-import { ChevronDown, RefreshCw } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 import { BrandMark } from "./BrandMark";
 import { toast } from "sonner";
 import { createExcuse } from "@/lib/excuse.functions";
-import type {
-  Chaos,
-  ExcuseRequest,
-  ExcuseResult as ExcuseResultType,
-  Situation,
-} from "@/types/excuse";
+import type { Chaos, ExcuseRequest, ExcuseResult as ExcuseResultType } from "@/types/excuse";
 import { chaosFields } from "@/types/excuse";
 import { SituationSelector } from "./SituationSelector";
 import { AudienceSelector } from "./AudienceSelector";
@@ -39,7 +34,6 @@ export function Generator({
     ...chaosFields("safe"),
   });
   const [chaos, setChaos] = useState<Chaos>("safe");
-  const [loreOpen, setLoreOpen] = useState(false);
   const [result, setResult] = useState<ExcuseResultType | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -101,9 +95,15 @@ export function Generator({
     [generate, loading, onEmergencyOpenChange, state],
   );
 
-  function onSituation(situation: Situation) {
-    setState((s) => ({ ...s, situation }));
-    if (situation === "mood_off") setLoreOpen(true);
+  function cookFromForm() {
+    if (!state.context?.trim()) {
+      toast.error("Spill the lore first.", {
+        description: "The AI needs the details to cook a real excuse.",
+      });
+      document.getElementById("context")?.focus();
+      return;
+    }
+    void run();
   }
 
   return (
@@ -116,40 +116,25 @@ export function Generator({
       />
 
       <div className="glass-card grain space-y-8 rounded-3xl p-5 sm:p-8">
-        <SituationSelector value={state.situation} onChange={onSituation} />
+        <SituationSelector
+          value={state.situation}
+          onChange={(situation) => setState((s) => ({ ...s, situation }))}
+        />
         <AudienceSelector
           value={state.audience}
           onChange={(audience) => setState((s) => ({ ...s, audience }))}
         />
         <VibeSelector value={chaos} onChange={applyChaos} />
+        <ContextInput
+          value={state.context ?? ""}
+          onChange={(context) => setState((s) => ({ ...s, context }))}
+        />
+        <LanguageSelector
+          value={state.language}
+          onChange={(language) => setState((s) => ({ ...s, language }))}
+        />
 
-        <div>
-          <button
-            type="button"
-            onClick={() => setLoreOpen((o) => !o)}
-            className="inline-flex items-center gap-1.5 text-sm font-bold text-muted-foreground hover:text-primary"
-            aria-expanded={loreOpen}
-          >
-            <ChevronDown
-              className={`size-4 transition-transform ${loreOpen ? "rotate-180" : ""}`}
-            />
-            GOT MORE LORE? 👀
-          </button>
-          {loreOpen ? (
-            <div className="mt-4 space-y-5">
-              <ContextInput
-                value={state.context ?? ""}
-                onChange={(context) => setState((s) => ({ ...s, context }))}
-              />
-              <LanguageSelector
-                value={state.language}
-                onChange={(language) => setState((s) => ({ ...s, language }))}
-              />
-            </div>
-          ) : null}
-        </div>
-
-        <GenerateButton sticky loading={loading} onGenerate={() => void run()} />
+        <GenerateButton sticky loading={loading} onGenerate={cookFromForm} />
       </div>
 
       <div ref={resultRef} className="mt-6">
